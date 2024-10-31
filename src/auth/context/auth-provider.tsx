@@ -54,7 +54,7 @@ export function AuthProvider({ children }: Props) {
 
             if (token && isValidToken(token)) {
 
-                const user = await sendGetAsync<AuthUser>('auth/me');
+                const user = await sendGetAsync<AuthUser>('auth/profile');
 
                 dispatch({
                     type: Action.INITIAL,

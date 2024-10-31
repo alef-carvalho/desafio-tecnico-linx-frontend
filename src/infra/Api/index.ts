@@ -1,4 +1,5 @@
 import axios, {AxiosRequestConfig} from 'axios';
+import {getAccessToken} from "../../auth/context/utils.ts";
 
 export class HttpError {
     public readonly message: string;
@@ -14,9 +15,19 @@ export interface HttpRequestConfig extends AxiosRequestConfig {
     skipAuth?: boolean;
 }
 
-const _api = axios.create({
+const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     timeout: 30 * 1000 // 30s
+});
+
+api.interceptors.request.use(async (config) => {
+    const accessToken = getAccessToken();
+
+    if (accessToken) {
+        config.headers.set('Authorization', `Bearer ${accessToken}`);
+    }
+
+    return config;
 });
 
 function handleError(error: any) {
@@ -39,7 +50,7 @@ function handleError(error: any) {
 
 export function sendGetAsync<T = any>(url: string, config: HttpRequestConfig = {}): Promise<T> {
     return new Promise((resolve, reject) => {
-        _api.get<T>(url, config)
+        api.get<T>(url, config)
             .then(({ data }) => {
                 resolve(data);
             })
@@ -51,7 +62,7 @@ export function sendGetAsync<T = any>(url: string, config: HttpRequestConfig = {
 
 export function sendPostAsync<T = any>(url: string, data = {}, config: HttpRequestConfig = {}): Promise<T> {
     return new Promise((resolve, reject) => {
-        _api.post<T>(url, data, config)
+        api.post<T>(url, data, config)
             .then(({ data }) => {
                 resolve(data);
             })
@@ -63,7 +74,7 @@ export function sendPostAsync<T = any>(url: string, data = {}, config: HttpReque
 
 export function sendPutAsync<T = any>(url: string, data = {}, config: HttpRequestConfig = {}): Promise<T> {
     return new Promise((resolve, reject) => {
-        _api.put<T>(url, data, config)
+        api.put<T>(url, data, config)
             .then(({ data }) => {
                 resolve(data);
             })
@@ -75,7 +86,7 @@ export function sendPutAsync<T = any>(url: string, data = {}, config: HttpReques
 
 export function sendDeleteAsync<T = any>(url: string, config: HttpRequestConfig = {}): Promise<T> {
     return new Promise((resolve, reject) => {
-        _api.delete<T>(url, config)
+        api.delete<T>(url, config)
             .then(({ data }) => {
                 resolve(data);
             })
